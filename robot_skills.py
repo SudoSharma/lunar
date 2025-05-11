@@ -14,10 +14,10 @@ def navigate_to(target_name: str):
     expected_pos = target_pos  # Save for scene drift detection
 
     for step in range(200):  # max steps
-        # Simulate cube moving mid-navigation
-        if step == 40 and target_name == "blue cube":
-            print("👋 Moving blue cube to test replanning...")
-            move_object("blue cube", [3.0, 0.0, 0.15])  # simulate disruption
+        # # Simulate cube moving mid-navigation
+        # if step == 40 and target_name == "blue cube":
+        #     print("👋 Moving blue cube to test replanning...")
+        #     move_object("blue cube", [3.0, 0.0, 0.15])  # simulate disruption
 
         # Get current target position (it might have moved)
         current_pos = get_position(target_name)
