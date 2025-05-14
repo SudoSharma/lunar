@@ -1,27 +1,14 @@
 import json
-from robot_skills import navigate_to, grasp, release
-from world import get_current_scene
+from robot_skills import navigate_to, grasp, release, rotate, look_for, remember_location
 from planner import propose_plan, resume_after_tools
-
-def scene_check(skill_name, args, scene):
-    if skill_name == "grasp":
-        obj = args.get("object_name", "")
-        return any(o["name"] == obj for o in scene)
-
-    if skill_name == "navigate_to":
-        target = args.get("location", "")
-        if target in {o["location"] for o in scene}:
-            return True
-        if any(o["name"] == target for o in scene):
-            return True
-        return False
-
-    return True
 
 def execute_loop(initial_user_command):
     tool_calls = propose_plan(initial_user_command)
 
-    while tool_calls:
+    while True:
+        if not tool_calls:
+           return [], None 
+
         tool_outputs = []
 
         for call in tool_calls:
@@ -30,23 +17,19 @@ def execute_loop(initial_user_command):
             tool_call_id = call.id
 
             print(f"🔧 Executing: {name}({args})")
-            if not scene_check(name, args, get_current_scene()):
-                content = f"Scene invalid for {name} with arguments: {args}"
-                print(f"❌ {content}")
-                tool_outputs.append({
-                    "tool_call_id": tool_call_id,
-                    "name": name,
-                    "content": content
-                })
-                continue
-
             try:
-                if name == "navigate_to":
-                    content = navigate_to(args["location"])
+                if name == "remember_location":
+                    content = remember_location(args["label"])
+                elif name == "look_for":
+                    content = look_for(args["object_name"])
+                elif name == "rotate":
+                    content = rotate(args["angle"])
                 elif name == "grasp":
                     content = grasp(args["object_name"])
                 elif name == "release":
                     content = release()
+                elif name == "navigate_to":
+                    content = navigate_to(args["location"])
                 else:
                     content = f"Unknown skill: {name}"
                     print(f"❓ {content}")
@@ -66,4 +49,7 @@ def execute_loop(initial_user_command):
                     "content": content
                 })
 
-        tool_calls = resume_after_tools(tool_outputs)
+        tool_calls, assistant_reply = resume_after_tools(tool_outputs)
+
+        if assistant_reply and not tool_calls:
+            return [], assistant_reply

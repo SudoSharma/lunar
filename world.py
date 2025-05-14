@@ -1,11 +1,12 @@
-import pybullet as p
+from perception import detect_object
 
-# This should be shared with sim_world
-object_name_to_id = {}
-
-def get_current_scene():
-    scene = []
-    for name, obj_id in object_name_to_id.items():
-        pos, _ = p.getBasePositionAndOrientation(obj_id)
-        scene.append({"name": name, "location": pos})
-    return scene
+def get_current_scene(objects_of_interest: list[str]):
+    visible = []
+    for name in objects_of_interest:
+        result = detect_object(name)
+        if result:
+            visible.append({
+                "name": name,
+                "location": result["position"]
+            })
+    return visible

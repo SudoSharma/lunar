@@ -1,5 +1,13 @@
 from sim_world import get_position, step_sim, get_robot_id, move_object
+from perception import detect_object
 import pybullet as p
+
+def look_for(object_name: str):
+    info = detect_object(object_name)
+    if info:
+        return f"Found {object_name} at {info['position']}"
+    else:
+        return f"Could not find {object_name} from this location"
 
 def navigate_to(target_name: str):
     print(f"🚶 Navigating to {target_name}...")

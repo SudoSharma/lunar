@@ -1,9 +1,11 @@
 import pybullet as p
 import pybullet_data
 import time
-from world import object_name_to_id
+# from world import object_name_to_id
 
 robot_id = None  # Declare robot globally so skills can use it
+
+object_name_to_id = {}
 
 def init_world(gui=True):
     global robot_id
