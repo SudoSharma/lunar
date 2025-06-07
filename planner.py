@@ -111,7 +111,11 @@ def propose_plan(user_command: str):
         "content": message.content or "",
         "tool_calls": message.tool_calls
     })
-    return message.tool_calls or []
+
+    reply = message.content or ""
+    tool_calls = message.tool_calls or []
+
+    return reply, tool_calls
 
 def resume_after_tools(tool_outputs: list):
     for output in tool_outputs:
