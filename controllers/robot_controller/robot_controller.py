@@ -1,20 +1,34 @@
-from robot_skills import * 
-from planner import propose_plan, resume_after_tools
+from lunarbot.robot_skills import * 
+from lunarbot.planner import propose_plan, resume_after_tools
 from controller import Robot
-import message_bus
+import requests
+
+def get_command():
+    try:
+        res = requests.get("http://localhost:5000/command").json()
+        return res["text"]
+    except Exception as e:
+        print(f"[robot] Error fetching command: {e}")
+        return None
+
+def send_response(text):
+    try:
+        requests.post("http://localhost:5000/response", json={"text": text})
+    except Exception as e:
+        print(f"[robot] Error sending response: {e}")
 
 robot = Robot()
 timestep = int(robot.getBasicTimeStep())
 
 while robot.step(timestep) != -1:
-    cmd = message_bus.get_from_human()
+    cmd = get_command()
     if not cmd:
         continue
 
-    message_bus.send_to_human(f"Received: '{cmd}'")
+    send_response(f"Received: '{cmd}'")
 
     natural_reply, plan = propose_plan(cmd)
-    message_bus.send_to_human(natural_reply)
+    send_response(natural_reply)
 
     tool_outputs = []
 
@@ -40,7 +54,6 @@ while robot.step(timestep) != -1:
             else:
                 output_msg = f"No handler for skill: {fn}"
 
-            # Default to a success message if function returns None
             if output_msg is None:
                 output_msg = f"{fn} executed."
 
@@ -52,15 +65,15 @@ while robot.step(timestep) != -1:
 
         except Exception as e:
             err_msg = f"Error during {fn}: {e}"
-            message_bus.send_to_human(err_msg)
+            send_response(err_msg)
             tool_outputs.append({
                 "tool_call_id": step.get("id", "no-id"),
                 "name": fn,
                 "content": err_msg
             })
-            break  # Optionally stop executing the rest if one fails
+            break
 
     if tool_outputs:
         new_tool_calls, new_msg = resume_after_tools(tool_outputs)
         if new_msg:
-            message_bus.send_to_human(new_msg)
+            send_response(new_msg)

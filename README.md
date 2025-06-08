@@ -6,6 +6,20 @@ LUNAR is an experimental framework for building intelligent home robots powered 
 
 ---
 
+
+## 🛠️ Setup Instructions
+
+- Clone and install repo: `pip install -e .`
+- Install requirements: `pip install -r requirements.txt`
+- Setup OpenAI key in `.env` file: `OPENAI_API_KEY=sk...`
+- Start env: `source .venv/bin/activate`
+- Run server: `python lunarbot/message_server.py`
+- Run chat interface: `python lunarbot/chat.py`
+- Run simulation: `webots`
+- Start chatting in `chat.py` terminal: "Hello!"
+
+---
+
 ## ✨ Key Features
 
 - **Language-first control**  
