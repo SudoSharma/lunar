@@ -1,4 +1,4 @@
-def navigate_to(target_name: str):
+def navigate_to(location: str):
     return "Done"
 
 def look_for(object_name: str):
@@ -7,10 +7,10 @@ def look_for(object_name: str):
 def grasp(object_name: str):
     return "Done"
 
-def rotate(degrees: int):
+def rotate(angle: int):
     return "Done"
 
-def remember_location(location_name: str):
+def remember_location(label: str):
     return "Done"
 
 def release():

@@ -2,6 +2,7 @@ from lunarbot.robot_skills import *
 from lunarbot.planner import propose_plan, resume_after_tools
 from controller import Robot
 import requests
+import json
 
 def get_command():
     try:
@@ -34,23 +35,23 @@ while robot.step(timestep) != -1:
 
     for step in plan:
         try:
-            fn = step["function"]["name"]
-            args = step["function"]["arguments"]
-            tool_call_id = step.get("id", "no-id")
+            tool_call_id = step.id
+            fn = step.function.name
+            args = json.loads(step.function.arguments)
             output_msg = ""
 
             if fn == "navigate_to":
-                output_msg = navigate_to(robot, **args)
+                output_msg = navigate_to(**args)
             elif fn == "look_for":
-                output_msg = look_for(robot, **args)
+                output_msg = look_for(**args)
             elif fn == "grasp":
-                output_msg = grasp(robot, **args)
+                output_msg = grasp(**args)
             elif fn == "rotate":
-                output_msg = rotate(robot, **args)
+                output_msg = rotate(**args)
             elif fn == "remember_location":
-                output_msg = remember_location(robot, **args)
+                output_msg = remember_location(**args)
             elif fn == "release":
-                output_msg = release(robot)
+                output_msg = release()
             else:
                 output_msg = f"No handler for skill: {fn}"
 
@@ -67,7 +68,7 @@ while robot.step(timestep) != -1:
             err_msg = f"Error during {fn}: {e}"
             send_response(err_msg)
             tool_outputs.append({
-                "tool_call_id": step.get("id", "no-id"),
+                "tool_call_id": tool_call_id,
                 "name": fn,
                 "content": err_msg
             })
