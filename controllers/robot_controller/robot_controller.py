@@ -26,9 +26,9 @@ while robot.step(timestep) != -1:
     if not cmd:
         continue
 
-    send_response(f"Received: '{cmd}'")
-
     natural_reply, plan = propose_plan(cmd)
+    if plan:
+        send_response(f"Proposed Plan: {[(step.function.name, step.function.arguments) for step in plan]}")
     send_response(natural_reply)
 
     tool_outputs = []

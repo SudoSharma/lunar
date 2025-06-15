@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
 from threading import Lock
+from collections import deque
 
 app = Flask(__name__)
 
 human_command = None
-robot_response = None
+robot_responses = deque() 
 lock = Lock()
 
 @app.route("/command", methods=["POST"])
@@ -27,19 +28,15 @@ def get_command():
 
 @app.route("/response", methods=["POST"])
 def receive_response():
-    global robot_response
     with lock:
-        robot_response = request.json["text"]
+        robot_responses.append(request.json["text"])
     return jsonify({"status": "ok"})
 
 @app.route("/response", methods=["GET"])
 def get_response():
-    global robot_response
     with lock:
-        if robot_response:
-            r = robot_response
-            robot_response = None
-            return jsonify({"text": r})
+        if robot_responses:
+            return jsonify({"text": robot_responses.popleft()})
         else:
             return jsonify({"text": None})
 

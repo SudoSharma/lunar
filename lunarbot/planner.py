@@ -52,13 +52,13 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "navigate_to",
-            "description": "Navigate to a known location or a previously remembered label.",
+            "description": "Navigate to a known location, a previously remembered label, or an arbitrary target.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "location": {"type": "string"}
+                    "target": {"type": "string"}
                 },
-                "required": ["location"]
+                "required": ["target"]
             },
         },
     },

@@ -1,4 +1,4 @@
-def navigate_to(location: str):
+def navigate_to(target: str):
     return "Done"
 
 def look_for(object_name: str):
