@@ -20,6 +20,8 @@ def send_response(text):
 
 robot = Robot()
 timestep = int(robot.getBasicTimeStep())
+camera = robot.getDevice('camera')
+camera.enable(timestep)
 
 while robot.step(timestep) != -1:
     cmd = get_command()
@@ -41,13 +43,14 @@ while robot.step(timestep) != -1:
             output_msg = ""
 
             if fn == "navigate_to":
-                output_msg = navigate_to(**args)
+                output_msg = navigate_to(robot, **args)
             elif fn == "look_for":
-                output_msg = look_for(**args)
+                output_msg = look_for(robot, camera, **args)
+                send_response(output_msg)
             elif fn == "grasp":
-                output_msg = grasp(**args)
+                output_msg = grasp(robot, **args)
             elif fn == "rotate":
-                output_msg = rotate(**args)
+                output_msg = rotate(robot, **args)
             elif fn == "remember_location":
                 output_msg = remember_location(**args)
             elif fn == "release":
