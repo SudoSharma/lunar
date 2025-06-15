@@ -42,28 +42,61 @@ def call_gpt4o_with_image_base64(b64_image: str, object_name: str):
     )
     return response.choices[0].message.content
 
-# def look_for(robot, camera, object_name: str):
-#     b64_image = get_camera_image(camera)
-#     result = call_gpt4o_with_image_base64(b64_image, object_name)
-#     return result
-
-
-def look_for(robot, camera, object_name: str) -> str:
-    for attempt in range(4):  # Try 4 directions (0°, 90°, 180°, 270°)
+def look_for(robot, camera, object_name: str, max_attempts: int = 12, move_every: int = 3):
+    for attempt in range(max_attempts):
         b64_image = get_camera_image(camera)
         response = call_gpt4o_with_image_base64(b64_image, object_name)
-        print(response)
+        print(f"[look_for] Attempt {attempt + 1}: GPT response → {response}")
 
         if "yes" in response.lower():
-            return f"Found {object_name} in view {attempt * 90}°"
-        
-        # Rotate 90 degrees to the left
-        rotate(robot, angle=90)
+            return f"Found {object_name} in view on attempt {attempt + 1}"
 
-    return f"Could not find {object_name} after looking around."
+        if (attempt + 1) % move_every == 0:
+            move(robot, distance=5)
+        else:
+            rotate(robot, angle=90)
+
+    return f"Could not find {object_name} after {max_attempts} attempts."
 
 def navigate_to(robot, target: str):
-    return "Done"
+    # TODO: Check if 'target' is a known location or remembered object.
+    # If known, retrieve its position and move there directly.
+
+    # If unknown, fallback to visual search
+    result = look_for(robot, robot.getDevice("camera"), target)
+    return f"Navigation result: {result}"
+
+
+def move(robot, distance: float, speed: float = 2.0):
+    """
+    Move the robot forward or backward by a given distance (in meters).
+    Positive = forward, Negative = backward.
+    """
+
+    timestep = int(robot.getBasicTimeStep())
+    left_motor = robot.getDevice("left wheel motor")
+    right_motor = robot.getDevice("right wheel motor")
+
+    left_motor.setPosition(float("inf"))
+    right_motor.setPosition(float("inf"))
+
+    direction = 1 if distance >= 0 else -1
+    actual_speed = direction * abs(speed)
+
+    left_motor.setVelocity(actual_speed)
+    right_motor.setVelocity(actual_speed)
+
+    # Assume speed is in m/s and robot moves at speed meters per second
+    duration_secs = abs(distance) / abs(speed)
+    steps = int((duration_secs * 1000) / timestep)
+
+    for _ in range(steps):
+        robot.step(timestep)
+
+    left_motor.setVelocity(0.0)
+    right_motor.setVelocity(0.0)
+
+    return f"Moved {'forward' if direction == 1 else 'backward'} {abs(distance):.2f} meters."
 
 
 def grasp(robot, object_name: str):

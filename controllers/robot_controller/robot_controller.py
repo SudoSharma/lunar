@@ -44,9 +44,10 @@ while robot.step(timestep) != -1:
 
             if fn == "navigate_to":
                 output_msg = navigate_to(robot, **args)
+            elif fn == "move":
+                output_msg = move(robot, **args)
             elif fn == "look_for":
                 output_msg = look_for(robot, camera, **args)
-                send_response(output_msg)
             elif fn == "grasp":
                 output_msg = grasp(robot, **args)
             elif fn == "rotate":
