@@ -147,7 +147,8 @@ def propose_plan(user_command: str):
     reply = message.content or ""
     tool_calls = message.tool_calls or []
 
-    return reply, tool_calls
+    # return order should match ``resume_after_tools`` for consistency
+    return tool_calls, reply
 
 def resume_after_tools(tool_outputs: list):
     for output in tool_outputs:
